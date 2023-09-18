@@ -289,7 +289,7 @@ func m4aTags(file string, track sp.Track) error {
 		"-metadata", fmt.Sprintf("title=%s", track.Title),
 		"-metadata", fmt.Sprintf("artist=%s", track.Artist),
 		"-metadata", fmt.Sprintf("album=%s", track.Album),
-		"-metadata", fmt.Sprintf("album-artist=%s", track.Artist),
+		"-metadata", fmt.Sprintf("album_artist=%s", track.Artist),
 		outputFile, // the file with the nice name
 	)
 
