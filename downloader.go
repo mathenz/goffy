@@ -27,7 +27,7 @@ func dlTrack(url, path string) error {
 		return err
 	}
 
-	fmt.Println("Getting info about track...")
+	fmt.Println("Getting track info...")
 
 	track := Track{
 		Title:  trackInfo.Title,
@@ -88,7 +88,7 @@ func dlFromTxt(file, savePath string) error {
 		return errors.New("file is empty")
 	}
 
-	fmt.Println("Getting info about all tracks...")
+	fmt.Println("Getting tracks' info...")
 	txt, err := os.Open(file)
 	if err != nil {
 		return err
