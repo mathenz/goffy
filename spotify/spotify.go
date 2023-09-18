@@ -13,9 +13,10 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/mathenz/goffy/utils"
+	
 	"github.com/tidwall/gjson"
+	
+	"github.com/mathenz/goffy/utils"
 )
 
 type PlaylistEndpoint struct {
