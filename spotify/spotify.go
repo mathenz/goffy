@@ -4,8 +4,6 @@
 
 package spotify
 
-//package main
-
 import (
 	"errors"
 	"fmt"
