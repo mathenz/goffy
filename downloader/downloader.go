@@ -351,7 +351,7 @@ func (dd DesktopDownloader) DDownloader(url string, downloadFunc func(string, st
 }
 
 func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, string) error) error {
-	var savePath string = "." // save music temporarily on the current path.
+	var savePath string = "." // temporarily save music to the current route
 
 	// before saving the music, it is necessary to delete the temporary folder and the .zip file (if any)
 	tempDir := "YourSpotifyMusic"
