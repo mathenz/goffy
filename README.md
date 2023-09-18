@@ -18,7 +18,7 @@ A CLI program to download public playlists and tracks of Spotify.
 * **ffmpeg** (required to add metadata to audio files)
 
 ## Installation
-Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.0.0).
+Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.0.1).
 
 Or executing:
 ```
