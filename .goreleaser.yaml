@@ -1,0 +1,39 @@
+project_name: goffy
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+nfpms:
+  - maintainer: Mateo H. (mathenz)
+    description: >-
+      A CLI program to download publics playlists and individual tracks of
+      Spotify
+    license: GPL v3
+    file_name_template: '{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}'
+archives:
+  - format: tar.gz
+    name_template: '{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}'
+    format_overrides:
+      - goos: windows
+        format: zip
+env_files:
+  github_token: ${{ secrets.GITHUB_TOKEN }}
+checksum:
+  name_template: checksums.txt
+snapshot:
+  name_template: '{{ incpatch .Version }}-next'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
