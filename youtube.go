@@ -1,4 +1,4 @@
-package youtube
+package main
 
 import (
 	"encoding/json"
@@ -9,9 +9,6 @@ import (
 	"github.com/adrg/strutil/metrics"
 	"github.com/raitonoberu/ytmusic"
 	"github.com/tidwall/gjson"
-
-	sp "github.com/mathenz/goffy/spotify"
-	"github.com/mathenz/goffy/utils"
 )
 
 type TrackMatch struct {
@@ -28,7 +25,7 @@ type Ratio struct {
 }
 
 // select the best result on YouTube Music
-func Match(spTrack *sp.Track, results []YTSong) string {
+func Match(spTrack *Track, results []YTSong) string {
 	if results == nil {
 		return ""
 	}
@@ -36,9 +33,9 @@ func Match(spTrack *sp.Track, results []YTSong) string {
 	trackMatch := TrackMatch{}
 	ratio := Ratio{}
 
-	spTrack.Title = utils.RemoveAccents(utils.ToLowerCase(spTrack.Title))
-	spTrack.Artist = utils.RemoveAccents(utils.ToLowerCase(spTrack.Artist))
-	spTrack.Album = utils.RemoveAccents(utils.ToLowerCase(spTrack.Album))
+	spTrack.Title = RemoveAccents(ToLowerCase(spTrack.Title))
+	spTrack.Artist = RemoveAccents(ToLowerCase(spTrack.Artist))
+	spTrack.Album = RemoveAccents(ToLowerCase(spTrack.Album))
 
 	for _, result := range results {
 		if result.Title != "" {
@@ -97,9 +94,9 @@ func (yt YTSong) buildResults(jsonResponse string) []YTSong {
 		id := result.Get("videoId").String()
 
 		item := YTSong{
-			Title:  utils.RemoveAccents(utils.ToLowerCase(title)),
-			Artist: utils.RemoveAccents(utils.ToLowerCase(artist)),
-			Album:  utils.RemoveAccents(utils.ToLowerCase(album)),
+			Title:  RemoveAccents(ToLowerCase(title)),
+			Artist: RemoveAccents(ToLowerCase(artist)),
+			Album:  RemoveAccents(ToLowerCase(album)),
 			Id:     id,
 		}
 
@@ -109,7 +106,7 @@ func (yt YTSong) buildResults(jsonResponse string) []YTSong {
 	return YTSongs
 }
 
-func VideoID(spTrack sp.Track) (string, error) {
+func VideoID(spTrack Track) (string, error) {
 	YTSong := YTSong{}
 	query := fmt.Sprintf("%s %s %s", spTrack.Title, spTrack.Artist, spTrack.Album) // example: "Little Sun Blues Pills Blues Pills"
 	search := ytmusic.TrackSearch(query)                                           // "github.com/raitonoberu/ytmusic"

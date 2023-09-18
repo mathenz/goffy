@@ -1,4 +1,4 @@
-package downloader
+package main
 
 import (
 	"bufio"
@@ -16,31 +16,26 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/kkdai/youtube/v2"
-
-	sp "github.com/mathenz/goffy/spotify"
-	"github.com/mathenz/goffy/template"
-	"github.com/mathenz/goffy/utils"
-	yt "github.com/mathenz/goffy/youtube"
 )
 
 var yellow = color.New(color.FgYellow)
 
 // concurrency is not necessary because only one track will be downloaded
 func dlTrack(url, path string) error {
-	trackInfo, err := sp.TrackInfo(url)
+	trackInfo, err := TrackInfo(url)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("Getting info about track...")
 
-	track := sp.Track{
+	track := Track{
 		Title:  trackInfo.Title,
 		Artist: trackInfo.Artist,
 		Album:  trackInfo.Album,
 	}
 
-	id, err := yt.VideoID(track)
+	id, err := VideoID(track)
 	if err != nil {
 		return err
 	}
@@ -64,7 +59,7 @@ func dlTrack(url, path string) error {
 }
 
 func dlPlaylist(url, path string) error {
-	tracks, err := sp.PlaylistInfo(url)
+	tracks, err := PlaylistInfo(url)
 	if err != nil {
 		return err
 	}
@@ -88,7 +83,7 @@ func dlFromTxt(file, savePath string) error {
 	}
 
 	// check if it is empty
-	txtSize, _ := utils.GetFileSize(file)
+	txtSize, _ := GetFileSize(file)
 	if txtSize <= 0 {
 		return errors.New("file is empty")
 	}
@@ -102,13 +97,13 @@ func dlFromTxt(file, savePath string) error {
 
 	var wg sync.WaitGroup
 	var tracksMutex sync.Mutex
-	var tracks []sp.Track
+	var tracks []Track
 	lines := make(chan string, 100)
 
 	processLines := func() {
 		defer wg.Done()
 		for line := range lines {
-			track, err := sp.TrackInfo(line)
+			track, err := TrackInfo(line)
 			if err != nil {
 				yellow.Printf("(URL: %s) - Error obtaining track information: %v\n", line, err)
 				continue
@@ -150,10 +145,10 @@ func dlFromTxt(file, savePath string) error {
 }
 
 // download more than one track using goroutines (useful for downloading playlists and multiple tracks from a .txt file)
-func dlTracks(tracks []sp.Track, path string) error {
+func dlTracks(tracks []Track, path string) error {
 	var wg sync.WaitGroup
 	concurrentDownloads := 5
-	downloadQueue := make(chan sp.Track, len(tracks))
+	downloadQueue := make(chan Track, len(tracks))
 
 	for _, t := range tracks {
 		downloadQueue <- t
@@ -165,13 +160,13 @@ func dlTracks(tracks []sp.Track, path string) error {
 		go func() {
 			defer wg.Done()
 			for t := range downloadQueue {
-				trackCopy := &sp.Track{
+				trackCopy := &Track{
 					Title:  t.Title,
 					Artist: t.Artist,
 					Album:  t.Album,
 				}
 
-				id, err := yt.VideoID(*trackCopy)
+				id, err := VideoID(*trackCopy)
 				if id == "" {
 					yellow.Println("Error 1:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded.")
 					continue
@@ -198,7 +193,7 @@ func dlTracks(tracks []sp.Track, path string) error {
 	time.Sleep(1 * time.Second)
 
 	for i, t := range tracks {
-		trackCopy := &sp.Track{
+		trackCopy := &Track{
 			Title:  t.Title,
 			Artist: t.Artist,
 			Album:  t.Album,
@@ -269,13 +264,13 @@ func dlAudio(id, path, title, artist string) error {
 			return err
 		}
 
-		fileSize, _ = utils.GetFileSize(route)
+		fileSize, _ = GetFileSize(route)
 	}
 
 	return nil
 }
 
-func m4aTags(file string, track sp.Track) error {
+func m4aTags(file string, track Track) error {
 	outputFile := file
 	index := strings.Index(outputFile, ".m4a")
 	if index != -1 {
@@ -311,8 +306,8 @@ func correctFilename(title, artist string) (string, string) {
 		invalidChars := []byte{'<', '>', '<', ':', '"', '\\', '/', '|', '?', '*'}
 		for _, invalidChar := range invalidChars {
 			if strings.Contains(title, string(invalidChar)) || strings.Contains(artist, string(invalidChar)) {
-				title = utils.RemoveInvalidChars(title, invalidChars)
-				artist = utils.RemoveInvalidChars(artist, invalidChars)
+				title = RemoveInvalidChars(title, invalidChars)
+				artist = RemoveInvalidChars(artist, invalidChars)
 			}
 		}
 	} else {
@@ -371,7 +366,7 @@ func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, str
 		}
 	}
 
-	path, err := utils.NewDir(savePath)
+	path, err := NewDir(savePath)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -384,12 +379,12 @@ func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, str
 	}
 
 	// compress the temporary folder
-	err = utils.ToZip(path, zipFile)
+	err = ToZip(path, zipFile)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	} else {
-		fmt.Printf("\nNow, from your phone device, open a new browser window and go to: %s:8080", utils.GetLocalIP())
+		fmt.Printf("\nNow, from your phone device, open a new browser window and go to: %s:8080", GetLocalIP())
 		currentDir, err := os.Getwd()
 		if err != nil {
 			fmt.Println(err)
@@ -398,7 +393,7 @@ func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, str
 
 		zipFile := filepath.Join(currentDir, "YourSpotifyMusic.zip")
 
-		err = template.ServeMusic(zipFile)
+		err = ServeMusic(zipFile)
 		if err != nil {
 			log.Fatalln(err)
 			return err

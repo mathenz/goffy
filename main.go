@@ -7,9 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-
-	"github.com/mathenz/goffy/downloader"
-	"github.com/mathenz/goffy/utils"
 )
 
 var (
@@ -40,7 +37,7 @@ func main() {
 	tempDir := filepath.Join(workingDir, "YourSpotifyMusic")
 	zipFile := filepath.Join(workingDir, "YourSpotifyMusic.zip")
 
-	utils.SetupCloseHandler(tempDir, zipFile)
+	SetupCloseHandler(tempDir, zipFile)
 
 	flag.StringVar(&trackF, "t", "", "Download a single track. Usage: -t [URL]")
 	flag.StringVar(&playlistF, "p", "", "Download an entire playlist. Usage: -p [URL]")
@@ -71,8 +68,8 @@ func main() {
 
 	flag.Parse()
 
-	ddl := downloader.DesktopDownloader{}
-	mdl := downloader.MobileDownloader{}
+	ddl := DesktopDownloader{}
+	mdl := MobileDownloader{}
 
 	if trackF != "" && desktopF != "" {
 		ddl.Track(trackF, desktopF)
@@ -90,5 +87,4 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
-
 }

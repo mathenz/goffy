@@ -1,6 +1,6 @@
 // html and stuff
 
-package template
+package main
 
 import (
 	"fmt"

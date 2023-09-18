@@ -2,7 +2,7 @@
 // The reason of not using the official API is because it would be a waste of time
 // because this program has no features related to users' private data
 
-package spotify
+package main
 
 import (
 	"errors"
@@ -13,10 +13,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	
+
 	"github.com/tidwall/gjson"
-	
-	"github.com/mathenz/goffy/utils"
 )
 
 type PlaylistEndpoint struct {
@@ -96,8 +94,8 @@ func TrackInfo(url string) (*Track, error) {
 		return nil, err
 	}
 
-	endpointQuery := utils.EncodeParam(fmt.Sprintf(`{"uri":"spotify:track:%s"}`, id))
-	endpoint := trackInitialPath + endpointQuery + "&extensions=" + utils.EncodeParam(trackEndPath)
+	endpointQuery := EncodeParam(fmt.Sprintf(`{"uri":"spotify:track:%s"}`, id))
+	endpoint := trackInitialPath + endpointQuery + "&extensions=" + EncodeParam(trackEndPath)
 
 	statusCode, jsonResponse, err := request(endpoint)
 	if err != nil {
@@ -130,8 +128,8 @@ func PlaylistInfo(url string) ([]Track, error) {
 	}
 
 	pConf := PlaylistEndpoint{Limit: 400}
-	endpointQuery := utils.EncodeParam(fmt.Sprintf(`{"uri":"spotify:playlist:%s","offset":%d,"limit":%d}`, id, pConf.Offset, pConf.Limit))
-	endpoint := playlistInitialPath + endpointQuery + "&extensions=" + utils.EncodeParam(playlistEndPath)
+	endpointQuery := EncodeParam(fmt.Sprintf(`{"uri":"spotify:playlist:%s","offset":%d,"limit":%d}`, id, pConf.Offset, pConf.Limit))
+	endpoint := playlistInitialPath + endpointQuery + "&extensions=" + EncodeParam(playlistEndPath)
 
 	statusCode, jsonResponse, err := request(endpoint)
 	if err != nil {
@@ -157,8 +155,8 @@ func PlaylistInfo(url string) ([]Track, error) {
 
 	for i := 1; i < int(pConf.Requests); i++ {
 		pConf.pagination()
-		endpointQuery = utils.EncodeParam(fmt.Sprintf(`{"uri":"spotify:playlist:%s","offset":%d,"limit":%d}`, id, pConf.Offset, pConf.Limit))
-		endpoint = playlistInitialPath + endpointQuery + "&extensions=" + utils.EncodeParam(playlistEndPath)
+		endpointQuery = EncodeParam(fmt.Sprintf(`{"uri":"spotify:playlist:%s","offset":%d,"limit":%d}`, id, pConf.Offset, pConf.Limit))
+		endpoint = playlistInitialPath + endpointQuery + "&extensions=" + EncodeParam(playlistEndPath)
 
 		statusCode, jsonResponse, err = request(endpoint)
 		if err != nil {
