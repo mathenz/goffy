@@ -80,7 +80,7 @@ func Match(spTrack *sp.Track, results []YTSong) string {
 	return trackMatch.Id
 }
 
-// build each YouTube's track and return an slice of them
+// build each YouTube track and return a slice of them
 func (yt YTSong) buildResults(jsonResponse string) []YTSong {
 	var YTSongs []YTSong
 	jsonResults := gjson.Get(jsonResponse, "tracks").Array()
