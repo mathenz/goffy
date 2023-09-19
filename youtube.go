@@ -53,8 +53,12 @@ func Match(spTrack *Track, results []YTSong) string {
 		}
 
 		if result.Album != "" {
-			if result.Album == spTrack.Title {
-				ratio.Album = 1
+			if result.Album == result.Title {
+				if result.Album == spTrack.Title {
+					ratio.Album = 1
+				} else {
+					continue
+				}
 			} else {
 				ratio.Album = strutil.Similarity(result.Album, spTrack.Album, metrics.NewLevenshtein())
 			}
