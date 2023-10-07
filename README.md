@@ -6,6 +6,7 @@ A CLI program to download public playlists and tracks of Spotify to your compute
 
 **goffy** does not use any official API, but its own unofficial "API" (light and rustic). Additionally, it has no features related to the private data of your Spotify account. Lastly, you can save the music on your computer or mobile device (this makes more sense).
 
+![Alt text](example.gif)
 
 ## Features
 
