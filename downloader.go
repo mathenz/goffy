@@ -135,7 +135,6 @@ func dlFromTxt(file, savePath string) error {
 	fmt.Println("Tracks' info collected:", len(tracks))
 	time.Sleep(1 * time.Second)
 	fmt.Println("Now, downloading tracks...")
-
 	err = dlTracks(tracks, savePath)
 	if err != nil {
 		return err
@@ -168,19 +167,19 @@ func dlTracks(tracks []Track, path string) error {
 
 				id, err := VideoID(*trackCopy)
 				if id == "" {
-					yellow.Println("Error 1:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded.")
+					yellow.Println("Error[1]:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded.")
 					continue
 				}
 
 				if err != nil {
-					yellow.Println("Error 2:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded. ")
+					yellow.Println("Error[2]:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded. ")
 					continue
 				}
 
 				trackCopy.Title, trackCopy.Artist = correctFilename(trackCopy.Title, trackCopy.Artist)
 				err = dlAudio(id, path, trackCopy.Title, trackCopy.Artist)
 				if err != nil {
-					yellow.Println("Error 3:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded.")
+					yellow.Println("Error[3]:", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded.")
 					continue
 				}
 				fmt.Println(fmt.Sprintf("'%s' by '%s' downloaded", trackCopy.Title, trackCopy.Artist))
