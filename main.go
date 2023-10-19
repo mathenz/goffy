@@ -14,7 +14,6 @@ var (
 	boldWhite = white.Add(color.Bold)
 )
 
-// Flags
 var (
 	trackF    string
 	playlistF string
@@ -24,18 +23,20 @@ var (
 )
 
 func main() {
-	// get the dir where program is invoked:
-	// the purpose of this is because when user wants to save the music to mobile device
-	// it creates a temporary dir on the path where program is invoked
-	// so, if program is interrumpted or finished, it is necessary delete the temporary dir
-	// and the zip file
+	/*
+		get the dir where the program is invoked:
+		the purpose of this is because when user wants to save the music to mobile device
+		it creates a temporary dir on the path where the program is invoked
+		so, if the program is interrumpted or finished, it is necessary delete the temporary dir
+		and the zip file
+	*/
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
-	tempDir := filepath.Join(workingDir, "YourSpotifyMusic")
-	zipFile := filepath.Join(workingDir, "YourSpotifyMusic.zip")
+	tempDir := filepath.Join(workingDir, "YourMusic")
+	zipFile := filepath.Join(workingDir, "YourMusic.zip")
 
 	SetupCloseHandler(tempDir, zipFile)
 
