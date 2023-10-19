@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"syscall"
 	"unicode"
 
 	"golang.org/x/text/runes"
@@ -56,7 +55,7 @@ func NewDir(path string) (string, error) {
 		return "", errors.New("invalid path")
 	}
 
-	dirName := "YourSpotifyMusic"
+	dirName := "YourMusic"
 	fullPath := filepath.Join(path, dirName)
 
 	if runtime.GOOS == "windows" {
@@ -122,8 +121,8 @@ func ToZip(dir, zipPath string) error {
 	return err
 }
 
-func GetFileSize(filename string) (int64, error) {
-	fileInfo, err := os.Stat(filename)
+func GetFileSize(file string) (int64, error) {
+	fileInfo, err := os.Stat(file)
 	if err != nil {
 		return 0, err
 	}
@@ -146,7 +145,7 @@ func RemoveInvalidChars(input string, invalidChars []byte) string {
 	filter := func(r rune) rune {
 		for _, c := range invalidChars {
 			if byte(r) == c {
-				return -1 // remove the char
+				return -1 /* remove the char */
 			}
 		}
 		return r
@@ -171,18 +170,44 @@ func GetLocalIP() string {
 	return ""
 }
 
-// catch interrupt signal (ctrl+c)
+/* catches interrupt signal (ctrl+c) */
 func SetupCloseHandler(tempDir, zipFile string) {
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		deleteTempFiles(tempDir, zipFile)
+		DeleteTempFiles(tempDir)
+		DeleteTempFiles(zipFile)
 		os.Exit(0)
 	}()
 }
 
-func deleteTempFiles(tempDir, zipFile string) {
-	os.RemoveAll(tempDir)
-	os.Remove(zipFile)
+func DeleteTempFiles(filePath string) {
+	if _, err := os.Stat(filePath); err == nil {
+		if err := os.RemoveAll(filePath); err != nil {
+			fmt.Println("Error deleting temporary files:", err)
+		}
+	}
+}
+
+/* used for the last validation in the Match function */
+func ExtractFirstWord(value string) string {
+	for i := range value {
+		if value[i] == ' ' {
+			return value[0:i]
+		}
+	}
+	return value
+}
+
+/*
+i don't know why, but there are artists who,
+due to their name, they add a hyphen
+between some words of their names
+on one platform and not on the other
+*/
+func CleanAndNormalize(s string) string {
+	cleaned := strings.ReplaceAll(s, "-", "")
+	cleaned = strings.ReplaceAll(cleaned, " ", "")
+	return cleaned
 }
