@@ -1,6 +1,8 @@
-// This is an unofficial (rustical and intentionally feature-limited) version of the Spotify Web API.
-// The reason of not using the official API is because it would be a waste of time
-// because this program has no features related to users' private data
+/*
+This is an unofficial (rustical and intentionally feature-limited) version of the Spotify Web API.
+The reason of not using the official API is because it would be a waste of time
+because this program has no features related to users' private data
+*/
 
 package main
 
@@ -33,12 +35,6 @@ const (
 	playlistEndPath     = `{"persistedQuery":{"version":1,"sha256Hash":"b39f62e9b566aa849b1780927de1450f47e02c54abf1e66e513f96e849591e41"}}`
 )
 
-func getID(url string) (string, error) {
-	parts := strings.Split(url, "/")
-	id := strings.Split(parts[4], "?")[0]
-	return id, nil
-}
-
 func accessToken() (string, error) {
 	resp, err := http.Get(tokenEndpoint)
 	if err != nil {
@@ -55,7 +51,7 @@ func accessToken() (string, error) {
 	return accessToken.String(), nil
 }
 
-// request to playlist/track endpoints
+/* requests to playlist/track endpoints */
 func request(endpoint string) (int, string, error) {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
@@ -82,18 +78,24 @@ func request(endpoint string) (int, string, error) {
 	return resp.StatusCode, string(body), nil
 }
 
+func getID(url string) string {
+	parts := strings.Split(url, "/")
+	id := strings.Split(parts[4], "?")[0]
+	return id
+}
+
+func isValidPattern(url, pattern string) bool {
+	match, _ := regexp.MatchString(pattern, url)
+	return match
+}
+
 func TrackInfo(url string) (*Track, error) {
 	trackPattern := `^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}$`
-	trackMatch, _ := regexp.MatchString(trackPattern, url)
-	if !trackMatch {
+	if !isValidPattern(url, trackPattern) {
 		return nil, errors.New("invalid track")
 	}
 
-	id, err := getID(url)
-	if err != nil {
-		return nil, err
-	}
-
+	id := getID(url)
 	endpointQuery := EncodeParam(fmt.Sprintf(`{"uri":"spotify:track:%s"}`, id))
 	endpoint := trackInitialPath + endpointQuery + "&extensions=" + EncodeParam(trackEndPath)
 
@@ -117,16 +119,11 @@ func TrackInfo(url string) (*Track, error) {
 
 func PlaylistInfo(url string) ([]Track, error) {
 	playlistPattern := `^https:\/\/open\.spotify\.com\/playlist\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}$`
-	playlistMatch, _ := regexp.MatchString(playlistPattern, url)
-	if !playlistMatch {
+	if !isValidPattern(url, playlistPattern) {
 		return nil, errors.New("invalid playlist")
 	}
 
-	id, err := getID(url)
-	if err != nil {
-		return nil, err
-	}
-
+	id := getID(url)
 	pConf := PlaylistEndpoint{Limit: 400}
 	endpointQuery := EncodeParam(fmt.Sprintf(`{"uri":"spotify:playlist:%s","offset":%d,"limit":%d}`, id, pConf.Offset, pConf.Limit))
 	endpoint := playlistInitialPath + endpointQuery + "&extensions=" + EncodeParam(playlistEndPath)
@@ -145,7 +142,8 @@ func PlaylistInfo(url string) ([]Track, error) {
 		return nil, errors.New("playlist is empty")
 	}
 
-	fmt.Println("Collecting tracks from playlist...")
+	name := gjson.Get(jsonResponse, "data.playlistV2.name").String()
+	fmt.Printf("Collecting tracks from the playlist '%s'...\n", name)
 	time.Sleep(2 * time.Second)
 
 	pConf.Requests = int64(math.Ceil(float64(pConf.TotalCount) / float64(pConf.Limit)))
@@ -171,7 +169,7 @@ func PlaylistInfo(url string) ([]Track, error) {
 	}
 
 	if len(tracks) > 0 {
-		fmt.Printf("Tracks collected: %d out of %d\n", len(tracks), pConf.TotalCount)
+		fmt.Printf("Tracks collected: %d\n", len(tracks))
 	}
 
 	return tracks, nil
@@ -191,7 +189,7 @@ func (pConf *PlaylistEndpoint) pagination() {
 	pConf.Offset = pConf.Offset + pConf.Limit
 }
 
-// obtain the data for each item (track) and build the slice
+/* constructs each Spotify track from JSON body and returns a slice of tracks */
 func processPlaylist(jsonResponse string) []Track {
 	items := gjson.Get(jsonResponse, "data.playlistV2.content.items").Array()
 	var tracks []Track
