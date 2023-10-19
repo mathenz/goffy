@@ -1,12 +1,12 @@
 # goffy
 
-A CLI program to download public playlists and tracks of Spotify to your computer or mobile device.
+A command-line tool for downloading public Spotify playlists and tracks to your computer or mobile device via Spotify URLs.
 
 > Downloads are not done directly from Spotify, but from YouTube (if a song matches).
 
 **goffy** does not use any official API, but its own unofficial "API" (light and rustic). Additionally, it has no features related to the private data of your Spotify account. Lastly, you can save the music on your computer or mobile device (this makes more sense).
 
-![Alt text](example.gif)
+![Alt text](/examples/p_example.gif)
 
 ## Features
 
