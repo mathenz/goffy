@@ -25,7 +25,7 @@ type Ratio struct {
 }
 
 /* selects the best result on YouTube Music */
-func Match(spTrack *Track, results []YTResult) string {
+func Match(results []YTResult, spTrack *Track) string {
 	var trackMatch TrackMatch
 	spTrack.Title = RemoveAccents(ToLowerCase(spTrack.Title))
 	spTrack.Artist = RemoveAccents(ToLowerCase(spTrack.Artist))
@@ -58,9 +58,11 @@ func isPartialMatch(result YTResult, spTrack *Track) bool {
 	ytTitle, spTitle := RemoveAccents(ToLowerCase(result.Title)), RemoveAccents(ToLowerCase(spTrack.Title))
 	ytTitleSeparated, spTitleSeparated := strings.Fields(ytTitle), strings.Fields(spTitle)
 
-	for _, spField := range spTitleSeparated {
-		for _, ytField := range ytTitleSeparated {
-			return strings.Contains(ytField, spField)
+	for _, ytField := range ytTitleSeparated {
+		for _, spField := range spTitleSeparated {
+			if strings.Contains(ytField, spField) {
+				return true
+			}
 		}
 	}
 
@@ -107,7 +109,7 @@ func VideoID(spTrack Track) (string, error) {
 
 	jsonStr, _ := json.Marshal(result)
 	ytResults := ytResult.buildResults(string(jsonStr))
-	id := Match(&spTrack, ytResults)
+	id := Match(ytResults, &spTrack)
 
 	return id, nil
 }
