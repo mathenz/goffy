@@ -19,7 +19,7 @@ A command-line tool for downloading public Spotify playlists and tracks to your 
 * **ffmpeg** (required to add metadata to audio files)
 
 ## Installation
-Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.0.3).
+Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.0.4).
 
 Or running:
 ```
