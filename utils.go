@@ -176,16 +176,16 @@ func SetupCloseHandler(tempDir, zipFile string) {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		DeleteTempFiles(tempDir)
-		DeleteTempFiles(zipFile)
+		DeleteFile(tempDir)
+		DeleteFile(zipFile)
 		os.Exit(0)
 	}()
 }
 
-func DeleteTempFiles(filePath string) {
+func DeleteFile(filePath string) {
 	if _, err := os.Stat(filePath); err == nil {
 		if err := os.RemoveAll(filePath); err != nil {
-			fmt.Println("Error deleting temporary files:", err)
+			fmt.Println("Error deleting file:", err)
 		}
 	}
 }
