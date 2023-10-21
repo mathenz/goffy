@@ -110,7 +110,7 @@ func processTxt(file string) ([]Track, error) {
 
 	wg.Wait()
 	if err := scanner.Err(); err != nil {
-		fmt.Println("Error at reading file:", err)
+		fmt.Println("Error reading file:", err)
 	}
 
 	fmt.Println("Tracks' info collected:", len(tracks))
@@ -119,8 +119,8 @@ func processTxt(file string) ([]Track, error) {
 
 func dlTrack(tracks []Track, path string) error {
 	var wg sync.WaitGroup
-	var stop = make(chan struct{}, 7)
-
+	var stop = make(chan struct{}, 5)
+	var totalTracks int
 	for _, t := range tracks {
 		wg.Add(1)
 		go func(track Track) {
@@ -150,20 +150,23 @@ func dlTrack(tracks []Track, path string) error {
 			trackCopy.Title, trackCopy.Artist = correctFilename(trackCopy.Title, trackCopy.Artist)
 			filePath := fmt.Sprintf("%s%s - %s.m4a", path, trackCopy.Title, trackCopy.Artist)
 
-			if _, err := os.Stat(filePath); err != nil {
-				yellow.Println(trackCopy.Title, "by", trackCopy.Artist)
+			if err := addTags(filePath, *trackCopy); err != nil {
+				yellow.Println("Error adding tags:", filePath)
 				return
 			}
 
-			if err := addTags(filePath, *trackCopy); err != nil {
-				yellow.Println(trackCopy.Title, "by", trackCopy.Artist)
+			size, _ := GetFileSize(filePath)
+			if size < 1 {
+				DeleteFile(filePath)
 			}
 
+			totalTracks++
 			fmt.Printf("'%s' by '%s' was downloaded\n", track.Title, track.Artist)
 		}(t)
 	}
 	wg.Wait()
 
+	fmt.Println("Total tracks downloaded:", totalTracks)
 	return nil
 }
 
@@ -171,7 +174,7 @@ func dlTrack(tracks []Track, path string) error {
 func getAudio(id, path, title, artist string) error {
 	dir, err := os.Stat(path)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
 	if !dir.IsDir() {
@@ -208,8 +211,7 @@ func getAudio(id, path, title, artist string) error {
 		}
 		defer file.Close()
 
-		_, err = io.Copy(file, stream)
-		if err != nil {
+		if _, err = io.Copy(file, stream); err != nil {
 			return err
 		}
 
@@ -220,29 +222,30 @@ func getAudio(id, path, title, artist string) error {
 }
 
 func addTags(file string, track Track) error {
-	outputFile := file
-	index := strings.Index(outputFile, ".m4a")
+	tempFile := file
+	index := strings.Index(file, ".m4a")
 	if index != -1 {
-		result := outputFile[:index]       /* filename but without the '.m4a' extension ('title - artist') */
-		outputFile = result + "2" + ".m4a" /* just a temporary dumb name ('title - artist2') */
+		result := tempFile[:index]       /* filename but with no extension ('/path/to/title - artist') */
+		tempFile = result + "2" + ".m4a" /* just a temporary dumb name ('/path/to/title - artist2.m4a') */
 	}
+
 	cmd := exec.Command(
 		"ffmpeg",
-		"-i", file,
+		"-i", file, /* /path/to/title - artist.m4a */
 		"-c", "copy",
 		"-metadata", fmt.Sprintf("title=%s", track.Title),
 		"-metadata", fmt.Sprintf("artist=%s", track.Artist),
 		"-metadata", fmt.Sprintf("album=%s", track.Album),
 		"-metadata", fmt.Sprintf("album_artist=%s", track.Artist),
-		outputFile, /* the file with the nice name */
+		tempFile, /* /path/to/title - artist2.m4a */
 	)
 
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 
-	if err := os.Rename(outputFile, file); err != nil {
+	/* remove '2' from file name */
+	if err := os.Rename(tempFile, file); err != nil {
 		return err
 	}
 
@@ -297,12 +300,12 @@ func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, str
 	/* before carrying out the download process, it is necessary to delete temporary files (if any) */
 	tempDir := filepath.Join(savePath, "YourMusic")
 	if _, err := os.Stat(tempDir); err == nil {
-		DeleteTempFiles(tempDir)
+		DeleteFile(tempDir)
 	}
 
 	zipFile := filepath.Join(savePath, "YourMusic.zip")
 	if _, err := os.Stat(zipFile); err == nil {
-		DeleteTempFiles(zipFile)
+		DeleteFile(zipFile)
 	}
 
 	path, err := NewDir(savePath)
