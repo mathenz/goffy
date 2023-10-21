@@ -23,13 +23,11 @@ var (
 )
 
 func main() {
-	/*
-	get the dir where the program is invoked:
+	/* get the dir where the program is invoked:
 	the purpose of this is because when user wants to save the music to mobile device
 	it creates a temporary dir on the path where the program is invoked
 	so, if the program is interrumpted or finished, it is necessary delete the temporary dir
-	and the zip file
-	*/
+	and the zip file */
 	workingDir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error:", err)
