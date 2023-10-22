@@ -168,9 +168,7 @@ func PlaylistInfo(url string) ([]Track, error) {
 		tracks = append(tracks, processPlaylist(jsonResponse)...)
 	}
 
-	if len(tracks) > 0 {
-		fmt.Printf("Tracks collected: %d\n", len(tracks))
-	}
+	fmt.Printf("Tracks collected: %d\n", len(tracks))
 
 	return tracks, nil
 }
