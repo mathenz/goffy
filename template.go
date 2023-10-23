@@ -20,7 +20,7 @@ func ServeMusic(zipFile string) error {
 		<body>
 			<div style="text-align: center;">
 				<h1 style="font-family:Serif; color:rgb(37, 62, 55);">goffy</h1>
-				<p style="font-family:Serif; font-size:15px;">Just click the button to download and enjoy your music.</p>
+				<p style="font-family:Serif; font-size:15px;">Simply click below to download and enjoy your music.</p>
 				<a style="font-family:Serif; font-size:15px; color:rgb(75, 119, 106);" href="%s">YourMusic</a>
 			</div>
 		</body>
