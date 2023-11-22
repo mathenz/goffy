@@ -1,16 +1,17 @@
 # goffy
 
-A command-line tool for downloading public Spotify playlists and tracks to your computer or mobile device via Spotify URLs.
+A command-line tool for downloading public playlists, albums and tracks to your computer or mobile device via Spotify URLs.
 
 > Downloads are not done directly from Spotify, but from YouTube (if a song matches).
 
 **goffy** does not use any official API, but its own unofficial "API" (light and rustic). Additionally, it has no features related to the private data of your Spotify account. Lastly, you can save the music on your computer or mobile device (this makes more sense).
 
-![Alt text](/examples/p_example.gif)
+![Alt text](/examples/album.gif)
 
 ## Features
 
 - Download a playlist (publics only)
+- Download an album
 - Download a single track
 - Download multiple tracks from a txt file
 
@@ -25,28 +26,28 @@ Or running:
 ```
 go install github.com/mathenz/goffy@latest
 ```
-
 ## Usage
 
 #### Download music to desktop
 ```
-goffy [option] [url] -d [path/to/save/music]
+goffy [option] [url] -d [path/to/musicfolder/]
 ```
 #### Download music to mobile device
 ```
 goffy [option] [url] -m
 ```
 
-In case you want to download multiple tracks from a .txt file, simply change ```[url]``` to ```[path/to/txt]```.
-> To correctly read all tracks from a .txt file, place the URL of each track on its own line.
+In case you want to download multiple tracks from a text file, simply change ```[url]``` to ```[path/to/file.txt]```.
+> To correctly read all tracks from a text file, place the URL of each track on its own line.
 
 
 ### Options
 
 ```
--p ----- download a playlist
--t ----- download a single track
--f ----- download multiple tracks from a file.txt
+-p    download a playlist
+-a    download an album
+-t    download a single track
+-f    download multiple tracks from a text file
 ```
 #### On mobile devices? How does it work?
 
@@ -61,6 +62,9 @@ Very simple. When you set the mobile platform flag (```-m```), the music will be
    goffy -p https://open.spotify.com/playlist/37i9dQZF1EIh4XfqZs7jCB?si=5855691d6a874444 -d /path/to/musicfolder/
    ```
    ```
+   goffy -a https://open.spotify.com/album/6Ym9q86JqAa4yi6BDaO35H?si=_Jcjf0sFTFuVCTSj0XYhcw -d /path/to/musicfolder/
+   ```
+   ```
    goffy -t https://open.spotify.com/track/5WSqNyypJ0hITVpvJMetqQ?si=5d9759cc4d8d4e57 -d /path/to/musicfolder/
    ```
    ```
@@ -73,6 +77,9 @@ Very simple. When you set the mobile platform flag (```-m```), the music will be
    goffy -p https://open.spotify.com/playlist/37i9dQZF1EIh4XfqZs7jCB?si=5855691d6a874444 -m
    ```
    ```
+   goffy -a https://open.spotify.com/album/6Ym9q86JqAa4yi6BDaO35H?si=_Jcjf0sFTFuVCTSj0XYhcw -m
+   ```
+   ```
    goffy -t https://open.spotify.com/track/5WSqNyypJ0hITVpvJMetqQ?si=5d9759cc4d8d4e57 -m
    ```
    ```
@@ -81,13 +88,11 @@ Very simple. When you set the mobile platform flag (```-m```), the music will be
    >
 
 
-To get the URL of a playlist or a track, just click on the three dots > Share > Copy-Link-to-Playlist or Copy-Song-Link
+> To obtain the url of a playlist, an album or a track, just click on the three dots > Share > Copy-Link-to-Playlist / Copy-Album-Link / Copy-Song-Link
 
 ### Contributing
 
 Feel free to open a pull request to:
 
 * Fix bugs
-* Increase performance
-* Reduce the number of lines of code (only if it does not reduce the performance)
 * Suggest improvements
