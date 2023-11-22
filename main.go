@@ -17,6 +17,7 @@ var (
 var (
 	trackF    string
 	playlistF string
+	albumF    string
 	fileF     string
 	desktopF  string
 	mobileF   bool
@@ -38,17 +39,18 @@ func main() {
 
 	SetupCloseHandler(tempDir, zipFile)
 
-	flag.StringVar(&trackF, "t", "", "Download a single track. Usage: -t [URL]")
-	flag.StringVar(&playlistF, "p", "", "Download an entire playlist. Usage: -p [URL]")
-	flag.StringVar(&fileF, "f", "", "Download multiple tracks from a txt file. Usage: -f [/PATH/TO/TXT] ")
-	flag.StringVar(&desktopF, "d", "", "Specify the path to save the music on your PC. Usage: -d [/PATH/TO/SAVE/MUSIC/] ")
+	flag.StringVar(&trackF, "t", "", "Download a single track. Usage: -t URL")
+	flag.StringVar(&playlistF, "p", "", "Download an entire playlist. Usage: -p URL")
+	flag.StringVar(&albumF, "a", "", "Download an album. Usage: -a URL")
+	flag.StringVar(&fileF, "f", "", "Download multiple tracks from a txt file. Usage: -f /PATH/TO/TXT")
+	flag.StringVar(&desktopF, "d", "", "Specify the path to save the music on your PC. Usage: -d /PATH/TO/MUSIC/FOLDER/")
 	flag.BoolVar(&mobileF, "m", false, "Save music on your mobile device. Don't have to specify any path. Usage: -m")
 
 	flag.Usage = func() {
 		fmt.Print("Usage: ")
-		boldWhite.Println("goffy [option] [url] [platform] [/path/to/save/]")
+		boldWhite.Println("goffy [option] [url] [platform] [/path/to/music/folder/]")
 
-		fmt.Println("If [option] is -f, [url] is the /path/to/txt")
+		fmt.Println("If [option] is -f, [url] is /path/to/txt")
 		fmt.Println("If [platform] is -m, [path] is omitted.")
 
 		fmt.Printf("\nOptions:\n")
@@ -74,12 +76,16 @@ func main() {
 		ddl.Track(trackF, desktopF)
 	} else if playlistF != "" && desktopF != "" {
 		ddl.Playlist(playlistF, desktopF)
+	} else if albumF != "" && desktopF != "" {
+		ddl.Album(albumF, desktopF)
 	} else if fileF != "" && desktopF != "" {
 		ddl.FromTxt(fileF, desktopF)
 	} else if trackF != "" && mobileF {
 		mdl.Track(trackF)
 	} else if playlistF != "" && mobileF {
 		mdl.Playlist(playlistF)
+	} else if albumF != "" && mobileF {
+		mdl.Album(albumF)
 	} else if fileF != "" && mobileF {
 		mdl.FromTxt(fileF)
 	} else {
