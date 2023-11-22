@@ -56,6 +56,22 @@ func dlPlaylist(url, savePath string) error {
 	return nil
 }
 
+func dlAlbum(url, savePath string) error {
+	tracks, err := AlbumInfo(url)
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(1 * time.Second)
+	fmt.Println("Now, downloading album...")
+	err = dlTrack(tracks, savePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func dlFromTxt(file, savePath string) error {
 	tracks, err := processTxt(file)
 	if err != nil {
@@ -78,7 +94,7 @@ func processTxt(file string) ([]Track, error) {
 		return nil, errors.New("file is not a txt")
 	}
 
-	/* check if it is empty */
+	/* checks if it is empty */
 	txtSize, _ := GetFileSize(file)
 	if txtSize <= 0 {
 		return nil, errors.New("file is empty")
@@ -103,6 +119,7 @@ func processTxt(file string) ([]Track, error) {
 			track, err := TrackInfo(line)
 			if err != nil {
 				yellow.Printf("(URL: %s) - Error obtaining track information: %v\n", line, err)
+				return
 			}
 			tracks = append(tracks, *track)
 		}(line)
@@ -119,14 +136,19 @@ func processTxt(file string) ([]Track, error) {
 
 func dlTrack(tracks []Track, path string) error {
 	var wg sync.WaitGroup
-	var stop = make(chan struct{}, 5)
 	var totalTracks int
+	results := make(chan int, len(tracks))
+	numCPUs := runtime.NumCPU()
+	semaphore := make(chan struct{}, numCPUs)
+
 	for _, t := range tracks {
 		wg.Add(1)
 		go func(track Track) {
 			defer wg.Done()
-			defer func() { <-stop }()
-			stop <- struct{}{}
+			semaphore <- struct{}{}
+			defer func() {
+				<-semaphore
+			}()
 
 			trackCopy := &Track{
 				Title:  track.Title,
@@ -136,14 +158,14 @@ func dlTrack(tracks []Track, path string) error {
 
 			id, err := VideoID(*trackCopy)
 			if id == "" || err != nil {
-				yellow.Println("Error (1):", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded")
+				yellow.Printf("Error (1): '%s' by '%s' could not be downloaded\n", trackCopy.Title, trackCopy.Artist)
 				return
 			}
 
 			trackCopy.Title, trackCopy.Artist = correctFilename(trackCopy.Title, trackCopy.Artist)
 			err = getAudio(id, path, trackCopy.Title, trackCopy.Artist)
 			if err != nil {
-				yellow.Println("Error (2):", trackCopy.Title, "by", trackCopy.Artist, "could not be downloaded")
+				yellow.Printf("Error (2): '%s' by '%s' could not be downloaded\n", trackCopy.Title, trackCopy.Artist)
 				return
 			}
 
@@ -151,7 +173,7 @@ func dlTrack(tracks []Track, path string) error {
 			filePath := fmt.Sprintf("%s%s - %s.m4a", path, trackCopy.Title, trackCopy.Artist)
 
 			if err := addTags(filePath, *trackCopy); err != nil {
-				yellow.Println("Error adding tags:", filePath)
+				yellow.Println("Error adding tags: ", filePath)
 				return
 			}
 
@@ -160,14 +182,23 @@ func dlTrack(tracks []Track, path string) error {
 				DeleteFile(filePath)
 			}
 
-			totalTracks++
 			fmt.Printf("'%s' by '%s' was downloaded\n", track.Title, track.Artist)
+			results <- 1
 		}(t)
 	}
-	wg.Wait()
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	for result := range results {
+		totalTracks += result
+	}
 
 	fmt.Println("Total tracks downloaded:", totalTracks)
 	return nil
+
 }
 
 /* github.com/kkdai/youtube */
@@ -199,17 +230,16 @@ func getAudio(id, path, title, artist string) error {
 	the download fails (and shows the file size as 0 bytes)
 	until the second or third attempt. */
 	var fileSize int64
+	file, err := os.Create(route)
+	if err != nil {
+		return err
+	}
+
 	for fileSize == 0 {
 		stream, _, err := client.GetStream(video, formats)
 		if err != nil {
 			return err
 		}
-
-		file, err := os.Create(route)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
 
 		if _, err = io.Copy(file, stream); err != nil {
 			return err
@@ -217,6 +247,7 @@ func getAudio(id, path, title, artist string) error {
 
 		fileSize, _ = GetFileSize(route)
 	}
+	defer file.Close()
 
 	return nil
 }
@@ -244,7 +275,7 @@ func addTags(file string, track Track) error {
 		return err
 	}
 
-	/* remove '2' from file name */
+	/* removes '2' from file name */
 	if err := os.Rename(tempFile, file); err != nil {
 		return err
 	}
@@ -279,7 +310,7 @@ type MobileDownloader struct{}
 
 func (dd DesktopDownloader) DDownloader(url string, downloadFunc func(string, string) error, args ...string) error {
 	path := args[0]
-	sep := string(filepath.Separator) /* get the directory separator depending on the OS */
+	sep := string(filepath.Separator) /* gets the directory separator depending on the OS */
 
 	if lastChar := path[len(path)-1]; lastChar != '/' && lastChar != '\\' {
 		path += sep
@@ -353,6 +384,10 @@ func (dd DesktopDownloader) Playlist(url string, savePath ...string) error {
 	return dd.DDownloader(url, dlPlaylist, savePath...)
 }
 
+func (dd DesktopDownloader) Album(url string, savePath ...string) error {
+	return dd.DDownloader(url, dlAlbum, savePath...)
+}
+
 func (dd DesktopDownloader) FromTxt(file string, savePath ...string) error {
 	return dd.DDownloader(file, dlFromTxt, savePath...)
 }
@@ -363,6 +398,10 @@ func (dm MobileDownloader) Track(url string) error {
 
 func (dm MobileDownloader) Playlist(url string) error {
 	return dm.MDownloader(url, dlPlaylist)
+}
+
+func (dm MobileDownloader) Album(url string) error {
+	return dm.MDownloader(url, dlAlbum)
 }
 
 func (dm MobileDownloader) FromTxt(file string) error {
