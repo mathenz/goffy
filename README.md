@@ -17,7 +17,7 @@ A command-line tool for downloading public playlists, albums and tracks to your 
 
 ## Requirements
 
-* **ffmpeg** (required to add metadata to audio files)
+* [FFmpeg](https://ffmpeg.org/) (required to add metadata to audio files)
 
 ## Installation
 Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.1.0).
