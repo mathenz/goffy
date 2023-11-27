@@ -264,10 +264,10 @@ func addTags(file string, track Track) error {
 		"ffmpeg",
 		"-i", file, /* /path/to/title - artist.m4a */
 		"-c", "copy",
+		"-metadata", fmt.Sprintf("album_artist=%s", track.Artist),
 		"-metadata", fmt.Sprintf("title=%s", track.Title),
 		"-metadata", fmt.Sprintf("artist=%s", track.Artist),
 		"-metadata", fmt.Sprintf("album=%s", track.Album),
-		"-metadata", fmt.Sprintf("album_artist=%s", track.Artist),
 		tempFile, /* /path/to/title - artist2.m4a */
 	)
 
@@ -356,21 +356,21 @@ func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, str
 	if err != nil {
 		fmt.Println(err)
 		return err
-	} else {
-		fmt.Printf("\nNow, from your phone device, open a new browser window and go to: %s:8080", GetLocalIP())
-		currentDir, err := os.Getwd()
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
+	}
 
-		zipFile := filepath.Join(currentDir, "YourMusic.zip")
+	fmt.Printf("\nNow, from your phone device, open a new browser window and go to: %s:8080", GetLocalIP())
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 
-		err = ServeMusic(zipFile)
-		if err != nil {
-			log.Fatalln(err)
-			return err
-		}
+	zipFile = filepath.Join(currentDir, "YourMusic.zip")
+
+	err = ServeMusic(zipFile)
+	if err != nil {
+		log.Fatalln(err)
+		return err
 	}
 
 	return nil
