@@ -72,23 +72,24 @@ func main() {
 	ddl := DesktopDownloader{}
 	mdl := MobileDownloader{}
 
-	if trackF != "" && desktopF != "" {
+	switch {
+	case trackF != "" && desktopF != "":
 		ddl.Track(trackF, desktopF)
-	} else if playlistF != "" && desktopF != "" {
+	case playlistF != "" && desktopF != "":
 		ddl.Playlist(playlistF, desktopF)
-	} else if albumF != "" && desktopF != "" {
+	case albumF != "" && desktopF != "":
 		ddl.Album(albumF, desktopF)
-	} else if fileF != "" && desktopF != "" {
+	case fileF != "" && desktopF != "":
 		ddl.FromTxt(fileF, desktopF)
-	} else if trackF != "" && mobileF {
+	case trackF != "" && mobileF:
 		mdl.Track(trackF)
-	} else if playlistF != "" && mobileF {
+	case playlistF != "" && mobileF:
 		mdl.Playlist(playlistF)
-	} else if albumF != "" && mobileF {
+	case albumF != "" && mobileF:
 		mdl.Album(albumF)
-	} else if fileF != "" && mobileF {
+	case fileF != "" && mobileF:
 		mdl.FromTxt(fileF)
-	} else {
+	default:
 		flag.Usage()
 		os.Exit(1)
 	}
