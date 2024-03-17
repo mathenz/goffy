@@ -20,12 +20,13 @@ A command-line tool for downloading public playlists, albums and tracks to your 
 * [FFmpeg](https://ffmpeg.org/) (required to add metadata to audio files)
 
 ## Installation
-Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.1.0).
+Install by downloading [latest release](https://github.com/mathenz/goffy/releases/tag/v1.1.1).
 
 Or running:
 ```
 go install github.com/mathenz/goffy@latest
 ```
+> If you installed a version earlier than the latest one (v1.1.1), replace "latest" with "v1.1.1" in the previous command.
 ## Usage
 
 #### Download music to desktop
