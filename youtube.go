@@ -24,12 +24,12 @@ type Ratio struct {
 	Title, Artist, Album, Total float64
 }
 
-/* selects the best result on YouTube Music */
+/* select the best result on YouTube Music */
 func Match(results []YTResult, spTrack *Track) string {
 	var trackMatch TrackMatch
-	spTrack.Title = RemoveAccents(ToLowerCase(spTrack.Title))
-	spTrack.Artist = RemoveAccents(ToLowerCase(spTrack.Artist))
-	spTrack.Album = RemoveAccents(ToLowerCase(spTrack.Album))
+	spTrack.Title = RemoveAccents(strings.ToLower(spTrack.Title))
+	spTrack.Artist = RemoveAccents(strings.ToLower(spTrack.Artist))
+	spTrack.Album = RemoveAccents(strings.ToLower(spTrack.Album))
 
 	for _, result := range results {
 		ratio := calculateMatchRatio(spTrack, result)
@@ -44,7 +44,7 @@ func Match(results []YTResult, spTrack *Track) string {
 
 func calculateMatchRatio(spTrack *Track, result YTResult) float64 {
 	var ratio Ratio
-
+	
 	ratio.Title = map[bool]float64{result.Title != "": strutil.Similarity(result.Title, spTrack.Title, metrics.NewLevenshtein()), true: 0}[true]
 	ratio.Artist = map[bool]float64{result.Artist != "" && strings.Contains(CleanAndNormalize(result.Artist), CleanAndNormalize(spTrack.Artist)): strutil.Similarity(result.Artist, spTrack.Artist, metrics.NewLevenshtein()), true: 0}[true]
 	ratio.Album = map[bool]float64{result.Album == result.Title && result.Album == spTrack.Title: 1, true: strutil.Similarity(result.Album, spTrack.Album, metrics.NewLevenshtein())}[true]
@@ -55,7 +55,7 @@ func calculateMatchRatio(spTrack *Track, result YTResult) float64 {
 
 /* last validation before returning the most precise ID from the Match function */
 func isPartialMatch(result YTResult, spTrack *Track) bool {
-	ytTitle, spTitle := RemoveAccents(ToLowerCase(result.Title)), RemoveAccents(ToLowerCase(spTrack.Title))
+	ytTitle, spTitle := RemoveAccents(strings.ToLower(result.Title)), RemoveAccents(strings.ToLower(spTrack.Title))
 	ytTitleSeparated, spTitleSeparated := strings.Fields(ytTitle), strings.Fields(spTitle)
 
 	for _, ytField := range ytTitleSeparated {
@@ -69,7 +69,7 @@ func isPartialMatch(result YTResult, spTrack *Track) bool {
 	return false
 }
 
-/* constructs each YouTube result into a structured track and returns a two-element slice */
+/* construct each YouTube result into a structured track and return a two-element slice */
 func (yt YTResult) buildResults(jsonResponse string) []YTResult {
 	var ytResults []YTResult
 	jsonResults := gjson.Get(jsonResponse, "tracks").Array()
@@ -86,9 +86,9 @@ func (yt YTResult) buildResults(jsonResponse string) []YTResult {
 		id := result.Get("videoId").String()
 
 		item := YTResult{
-			Title:  RemoveAccents(ToLowerCase(title)),
-			Artist: RemoveAccents(ToLowerCase(artist)),
-			Album:  RemoveAccents(ToLowerCase(album)),
+			Title:  RemoveAccents(strings.ToLower(title)),
+			Artist: RemoveAccents(strings.ToLower(artist)),
+			Album:  RemoveAccents(strings.ToLower(album)),
 			Id:     id,
 		}
 
@@ -100,7 +100,7 @@ func (yt YTResult) buildResults(jsonResponse string) []YTResult {
 
 func VideoID(spTrack Track) (string, error) {
 	var ytResult YTResult
-	query := fmt.Sprintf("'%s' %s %s", spTrack.Title, spTrack.Artist, spTrack.Album) /* example: 'Lovesong' The Cure Disintegration */
+	query := fmt.Sprintf("'%s' %s %s", spTrack.Title, spTrack.Artist, spTrack.Album)
 	search := ytmusic.TrackSearch(query)                                             /* github.com/raitonoberu/ytmusic */
 	result, err := search.Next()
 	if err != nil {
