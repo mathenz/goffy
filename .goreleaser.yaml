@@ -15,7 +15,7 @@ builds:
 nfpms:
   - maintainer: Mateo H. (mathenz)
     description: >-
-      A command-line tool for downloading public Spotify playlists and tracks to your computer or mobile device via Spotify URLs.
+      A command-line tool for downloading public playlists, albums and individual tracks via Spotify URLs.
     license: GPL v3
     file_name_template: '{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}'
 archives:
