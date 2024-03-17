@@ -89,12 +89,11 @@ func dlFromTxt(file, savePath string) error {
 
 func processTxt(file string) ([]Track, error) {
 	/* first check if it is a txt */
-	ext := filepath.Ext(file)
-	if !strings.EqualFold(ext, ".txt") {
+	if !IsTxt(file) {
 		return nil, errors.New("file is not a txt")
 	}
 
-	/* checks if it is empty */
+	/* check if it is empty */
 	txtSize, _ := GetFileSize(file)
 	if txtSize <= 0 {
 		return nil, errors.New("file is empty")
@@ -165,6 +164,7 @@ func dlTrack(tracks []Track, path string) error {
 			trackCopy.Title, trackCopy.Artist = correctFilename(trackCopy.Title, trackCopy.Artist)
 			err = getAudio(id, path, trackCopy.Title, trackCopy.Artist)
 			if err != nil {
+			    fmt.Println(err)
 				yellow.Printf("Error (2): '%s' by '%s' could not be downloaded\n", trackCopy.Title, trackCopy.Artist)
 				return
 			}
@@ -179,7 +179,7 @@ func dlTrack(tracks []Track, path string) error {
 
 			size, _ := GetFileSize(filePath)
 			if size < 1 {
-				DeleteFile(filePath)
+				DeleteResource(filePath)
 			}
 
 			fmt.Printf("'%s' by '%s' was downloaded\n", track.Title, track.Artist)
@@ -220,7 +220,7 @@ func getAudio(id, path, title, artist string) error {
 
 	/* itag code: 140, container: m4a, content: audio, bitrate: 128k */
 	/* change the FindByItag parameter to 139 if you want smaller files (but with a bitrate of 48k) */
-	formats := video.Formats.FindByItag(140)
+	formats := video.Formats.Itag(140)
 
 	filename := fmt.Sprintf("%s - %s.m4a", title, artist)
 	route := filepath.Join(path, filename)
@@ -236,7 +236,7 @@ func getAudio(id, path, title, artist string) error {
 	}
 
 	for fileSize == 0 {
-		stream, _, err := client.GetStream(video, formats)
+		stream, _, err := client.GetStream(video, &formats[0])
 		if err != nil {
 			return err
 		}
@@ -331,12 +331,12 @@ func (dm MobileDownloader) MDownloader(url string, downloadFunc func(string, str
 	/* before carrying out the download process, it is necessary to delete temporary files (if any) */
 	tempDir := filepath.Join(savePath, "YourMusic")
 	if _, err := os.Stat(tempDir); err == nil {
-		DeleteFile(tempDir)
+		DeleteResource(tempDir)
 	}
 
 	zipFile := filepath.Join(savePath, "YourMusic.zip")
 	if _, err := os.Stat(zipFile); err == nil {
-		DeleteFile(zipFile)
+		DeleteResource(zipFile)
 	}
 
 	path, err := NewDir(savePath)
