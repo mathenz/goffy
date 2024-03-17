@@ -23,19 +23,6 @@ func EncodeParam(s string) string {
 	return url.QueryEscape(s)
 }
 
-func ToLowerCase(s string) string {
-	var result string
-	for _, char := range s {
-		if char >= 'A' && char <= 'Z' {
-			result += string(char + 32)
-		} else {
-			result += string(char)
-		}
-	}
-
-	return result
-}
-
 func isPathValid(path string) bool {
 	dir, err := os.Stat(path)
 	if err != nil {
@@ -47,6 +34,17 @@ func isPathValid(path string) bool {
 		return false
 	}
 
+	return true
+}
+
+func IsTxt(file string) bool {
+    parts := strings.Index(file, ".")
+    	if parts != -1 {
+    		extension := file[parts+1:]
+    		if strings.ToLower(extension) != "txt" {
+    			return false
+    		}
+    	}
 	return true
 }
 
@@ -170,22 +168,34 @@ func GetLocalIP() string {
 	return ""
 }
 
-/* catches interrupt signal (ctrl+c) */
-func SetupCloseHandler(tempDir, zipFile string) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		<-c
-		DeleteFile(tempDir)
-		DeleteFile(zipFile)
-		os.Exit(0)
-	}()
+func GetCurrentDir() string {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return ""
+	}
+
+	return workingDir
 }
 
-func DeleteFile(filePath string) {
-	if _, err := os.Stat(filePath); err == nil {
-		if err := os.RemoveAll(filePath); err != nil {
-			fmt.Println("Error deleting file:", err)
+// handle ctrl + c (delete music folder and zip file)
+func InterruptHandler(resource string) (err error) {
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt)
+    go func() {
+        <-c
+        DeleteResource(resource)
+		DeleteResource(resource)
+        os.Exit(1)
+    }()
+    
+    return err
+}
+
+func DeleteResource(resource string) {
+	if _, err := os.Stat(resource); err == nil {
+		if err := os.RemoveAll(resource); err != nil {
+			fmt.Println("Error deleting resource:", err)
 		}
 	}
 }
