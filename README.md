@@ -26,38 +26,39 @@ Or running:
 ```
 go install github.com/mathenz/goffy@latest
 ```
-> If you installed a version earlier than the latest one (v1.1.1), replace "latest" with "v1.1.1" in the previous command.
+> If a version earlier than the latest one (v1.1.1) was installed, replace "latest" with "v1.1.1" in the previous command.
+
 ## Usage
 
-#### Download music to desktop
+#### Download music to your local machine
 ```
 goffy [option] [url] -d [path/to/musicfolder/]
 ```
-#### Download music to mobile device
+#### Download music to your mobile device
 ```
-goffy [option] [url] -m
+goffy -m [option] [url]
 ```
 
-In case you want to download multiple tracks from a text file, simply change ```[url]``` to ```[path/to/file.txt]```.
+In case you want to download multiple tracks from a text file, simply change ```[url]``` to ```[path/to/songs.txt]```
 > To correctly read all tracks from a text file, place the URL of each track on its own line.
 
 
 ### Options
 
 ```
--p    download a playlist
--a    download an album
--t    download a single track
--f    download multiple tracks from a text file
+-p,  download a playlist
+-a,  download an album
+-t,  download a single track
+-f,  download multiple tracks from a text file
 ```
 #### On mobile devices? How does it work?
 
-Very simple. When you set the mobile platform flag (```-m```), the music will be stored in a temporary directory on the host machine, then that folder is compressed and presented at the address ```<YOUR_HOSTMACHINE_IP>:8080```. You, from your mobile device, will access from the browser and get the music. Afterwards, both the temporary folder and the .zip file will be deleted.
+Very simple. The music will be stored in a temporary directory on the local machine, then that folder is compressed and presented at the address ```<YOUR_HOSTMACHINE_IP>:8080```. You, from your mobile device, will access from the browser and get the music. Afterwards, both the temporary folder and the zip file will be deleted.
 
 
 ### Examples
 
-- If you want to save the music on your desktop machine:
+- If you want to save the music on your local machine:
    > 
    ```
    goffy -p https://open.spotify.com/playlist/37i9dQZF1EIh4XfqZs7jCB?si=5855691d6a874444 -d /path/to/musicfolder/
@@ -69,22 +70,22 @@ Very simple. When you set the mobile platform flag (```-m```), the music will be
    goffy -t https://open.spotify.com/track/5WSqNyypJ0hITVpvJMetqQ?si=5d9759cc4d8d4e57 -d /path/to/musicfolder/
    ```
    ```
-   goffy -f /path/to/file.txt -d /path/to/musicfolder/
+   goffy -f /path/to/songs.txt -d /path/to/musicfolder/
    ```
    >
 - Or if you want to save the music on your mobile device:
    > 
    ```
-   goffy -p https://open.spotify.com/playlist/37i9dQZF1EIh4XfqZs7jCB?si=5855691d6a874444 -m
+   goffy -m -p https://open.spotify.com/playlist/37i9dQZF1EIh4XfqZs7jCB?si=5855691d6a874444
    ```
    ```
-   goffy -a https://open.spotify.com/album/6Ym9q86JqAa4yi6BDaO35H?si=_Jcjf0sFTFuVCTSj0XYhcw -m
+   goffy -m -a https://open.spotify.com/album/6Ym9q86JqAa4yi6BDaO35H?si=_Jcjf0sFTFuVCTSj0XYhcw
    ```
    ```
-   goffy -t https://open.spotify.com/track/5WSqNyypJ0hITVpvJMetqQ?si=5d9759cc4d8d4e57 -m
+   goffy -m -t https://open.spotify.com/track/5WSqNyypJ0hITVpvJMetqQ?si=5d9759cc4d8d4e57
    ```
    ```
-   goffy -f /path/to/file.txt -m
+   goffy -m -f /path/to/songs.txt
    ```
    >
 
